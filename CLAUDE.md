@@ -68,7 +68,7 @@ Regras que não se quebram:
 
 ## Stack
 
-Node 24 LTS, TypeScript 7 (strict), Fastify 5, TypeBox, PostgreSQL + Drizzle,
+Node 24 LTS, TypeScript 6 (strict), ESLint + Prettier, Fastify 5, TypeBox, PostgreSQL + Drizzle,
 Redis, BullMQ, Cloudflare R2 (API S3; MinIO local), Resend (e-mail; Mailpit local), Vitest, Testcontainers, Pino, Prometheus, OpenTelemetry,
 Docker Compose, GitHub Actions, Terraform (AWS). As escolhas e os motivos
 estão em `docs/adr/`.

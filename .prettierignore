@@ -1,0 +1,6 @@
+dist/
+coverage/
+pnpm-lock.yaml
+
+# Docs are prose: Prettier would reflow tables and change list structure.
+*.md
