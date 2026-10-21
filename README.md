@@ -8,6 +8,21 @@ construída em etapas, documentadas em [`docs/roadmap.md`](docs/roadmap.md),
 com notas de aprendizado em [`docs/diario/`](docs/diario/) e decisões de
 arquitetura em [`docs/adr/`](docs/adr/).
 
+## Como rodar
+
+Requisitos: Node 24+, pnpm e Docker.
+
+```bash
+pnpm install
+cp .env.example .env   # opcional: tudo tem valor padrão
+pnpm infra:up          # Postgres (porta 5433) e Redis (porta 6379)
+pnpm dev               # API em http://localhost:3000
+curl localhost:3000/health
+```
+
+Outros scripts: `pnpm test`, `pnpm lint`, `pnpm typecheck`, `pnpm format`,
+`pnpm build && pnpm start`, `pnpm infra:down`.
+
 ## Temas cobertos
 
 Arquitetura hexagonal com DDD tático · observabilidade (Pino, Prometheus,

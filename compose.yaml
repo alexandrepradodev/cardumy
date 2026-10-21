@@ -1,0 +1,38 @@
+# Local infrastructure for development. Start with: pnpm infra:up
+# Credentials here are for local use only; real ones live in the platform's secrets.
+name: cardumy
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: cardumy
+      POSTGRES_PASSWORD: cardumy
+      POSTGRES_DB: cardumy
+    ports:
+      # Host port 5433: a Postgres installed on the machine often already uses 5432.
+      - '${POSTGRES_HOST_PORT:-5433}:5432'
+    volumes:
+      # Postgres 18 images keep data under /var/lib/postgresql (not .../data).
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cardumy -d cardumy']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - '${REDIS_HOST_PORT:-6379}:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
+  redis-data:
