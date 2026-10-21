@@ -1,12 +1,19 @@
+import { ConfigError, loadConfig } from './infra/config.js';
 import { buildApp } from './infra/http/app.js';
 
-// Port and host move to validated config in the next step.
-const PORT = 3000;
-// 0.0.0.0 listens on every network interface, which a container needs:
-// 127.0.0.1 would only accept connections from inside the container itself.
-const HOST = '0.0.0.0';
+let config;
+try {
+  config = loadConfig(process.env);
+} catch (error) {
+  // No logger exists yet: config decides the log level.
+  if (error instanceof ConfigError) {
+    console.error(error.message);
+    process.exit(1);
+  }
+  throw error;
+}
 
-const app = buildApp({ logger: true });
+const app = buildApp({ logger: { level: config.LOG_LEVEL } });
 
 // Graceful shutdown: on SIGTERM (sent by Docker, Railway, ECS on deploy)
 // stop accepting new requests, finish the in-flight ones, then exit.
@@ -24,7 +31,9 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 }
 
 try {
-  await app.listen({ port: PORT, host: HOST });
+  // HOST defaults to 0.0.0.0: a container needs to listen on every interface,
+  // 127.0.0.1 would only accept connections from inside the container itself.
+  await app.listen({ port: config.PORT, host: config.HOST });
 } catch (error) {
   app.log.error(error, 'failed to start');
   process.exit(1);
