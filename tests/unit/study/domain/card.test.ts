@@ -38,3 +38,19 @@ describe('Card', () => {
     expect(makeCard('card-1').equals(makeCard('card-2'))).toBe(false);
   });
 });
+
+describe('Card review', () => {
+  it('starts due right away', () => {
+    expect(makeCard().isDue(now)).toBe(true);
+  });
+
+  it('is not due anymore after a good review, until its next date', () => {
+    const card = makeCard();
+
+    card.review('good', now);
+
+    expect(card.isDue(now)).toBe(false);
+    expect(card.isDue(card.schedule.dueAt)).toBe(true);
+    expect(card.schedule.reviewCount).toBe(1);
+  });
+});

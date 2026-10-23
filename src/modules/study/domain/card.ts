@@ -1,4 +1,6 @@
 import type { CardText } from './card-text.js';
+import type { Rating } from './rating.js';
+import { ReviewSchedule } from './review-schedule.js';
 
 interface CreateCardProps {
   id: string;
@@ -10,17 +12,19 @@ interface CreateCardProps {
 
 // Entity and aggregate root: a card is its own aggregate (decision B),
 // so it only references its deck by id instead of living inside it.
+// Its schedule can only change through review(), never directly.
 export class Card {
   private constructor(
     readonly id: string,
     readonly deckId: string,
     private _front: CardText,
     private _back: CardText,
+    private _schedule: ReviewSchedule,
     readonly createdAt: Date,
   ) {}
 
   static create({ id, deckId, front, back, now }: CreateCardProps): Card {
-    return new Card(id, deckId, front, back, now);
+    return new Card(id, deckId, front, back, ReviewSchedule.forNewCard(now), now);
   }
 
   get front(): CardText {
@@ -31,9 +35,21 @@ export class Card {
     return this._back;
   }
 
+  get schedule(): ReviewSchedule {
+    return this._schedule;
+  }
+
   edit(front: CardText, back: CardText): void {
     this._front = front;
     this._back = back;
+  }
+
+  isDue(now: Date): boolean {
+    return this._schedule.isDue(now);
+  }
+
+  review(rating: Rating, now: Date): void {
+    this._schedule = this._schedule.next(rating, now);
   }
 
   equals(other: Card): boolean {
