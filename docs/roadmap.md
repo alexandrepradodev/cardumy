@@ -9,7 +9,7 @@ Status: `[ ]` não começou · `[~]` em andamento · `[x]` concluída
 | --- | --- | --- | --- | --- |
 | [x] | 0. Fundação | Projeto TypeScript, lint, scripts, Docker Compose | Fastify com `GET /health`, Postgres e Redis via `docker compose up`, `pnpm test` rodando | 8 |
 | [x] | 1. Domínio hexagonal | Entidades, value objects, agregados, casos de uso, ports e adapters | Deck, Card e revisão (FSRS simplificado) com repositórios em memória e testes unitários no Vitest | 1, 7 |
-| [ ] | 2. API HTTP | Rotas Fastify, schemas TypeBox, erros padronizados, OpenAPI | CRUD de decks e cards, Swagger em `/docs`, testes com `fastify.inject()` | 6, 7 |
+| [~] | 2. API HTTP | Rotas Fastify, schemas TypeBox, erros padronizados, OpenAPI | CRUD de decks e cards, Swagger em `/docs`, testes com `fastify.inject()` | 6, 7 |
 | [ ] | 3. Persistência | Adapter de banco, migrações, transações, testes de integração, storage de objetos, URL pré-assinada | Repositórios Postgres com Drizzle, testes com Testcontainers, autenticação simples por JWT, upload de imagens no R2 via porta `FileStorage` (MinIO local) | 1, 7 |
 | [ ] | 4. Docker e CI | Dockerfile multi-stage, pipeline de PR | Imagem da API; GitHub Actions rodando lint e testes em todo PR | 8 |
 | [ ] | 5. Observabilidade | Logs estruturados, métricas, tracing distribuído | Pino com request id, `/metrics` para Prometheus, OpenTelemetry com Grafana e Jaeger no Compose | 2 |

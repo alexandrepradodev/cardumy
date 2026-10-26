@@ -7,9 +7,9 @@ import { makeStudyKit } from '../../../support/study-test-kit.js';
 describe('AddCard', () => {
   it('adds a card to a deck of the user', async () => {
     const { createDeck, addCard, cards } = makeStudyKit();
-    const { deckId } = await createDeck.execute({ ownerId: 'user-1', name: 'English' });
+    const { id: deckId } = await createDeck.execute({ ownerId: 'user-1', name: 'English' });
 
-    const { cardId } = await addCard.execute({
+    const { id: cardId } = await addCard.execute({
       userId: 'user-1',
       deckId,
       front: 'to be',
@@ -31,7 +31,7 @@ describe('AddCard', () => {
 
   it('fails as not found when the deck belongs to someone else', async () => {
     const { createDeck, addCard } = makeStudyKit();
-    const { deckId } = await createDeck.execute({ ownerId: 'user-1', name: 'English' });
+    const { id: deckId } = await createDeck.execute({ ownerId: 'user-1', name: 'English' });
 
     await expect(
       addCard.execute({ userId: 'intruder', deckId, front: 'a', back: 'b' }),
@@ -40,7 +40,7 @@ describe('AddCard', () => {
 
   it('rejects an empty side', async () => {
     const { createDeck, addCard } = makeStudyKit();
-    const { deckId } = await createDeck.execute({ ownerId: 'user-1', name: 'English' });
+    const { id: deckId } = await createDeck.execute({ ownerId: 'user-1', name: 'English' });
 
     await expect(
       addCard.execute({ userId: 'user-1', deckId, front: '  ', back: 'b' }),

@@ -8,8 +8,13 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 async function kitWithCard() {
   const kit = makeStudyKit();
-  const { deckId } = await kit.createDeck.execute({ ownerId: 'user-1', name: 'English' });
-  const { cardId } = await kit.addCard.execute({ userId: 'user-1', deckId, front: 'a', back: 'b' });
+  const { id: deckId } = await kit.createDeck.execute({ ownerId: 'user-1', name: 'English' });
+  const { id: cardId } = await kit.addCard.execute({
+    userId: 'user-1',
+    deckId,
+    front: 'a',
+    back: 'b',
+  });
   return { ...kit, cardId };
 }
 
@@ -17,9 +22,9 @@ describe('ReviewCard', () => {
   it('schedules the next review and saves the card', async () => {
     const { reviewCard, cards, cardId } = await kitWithCard();
 
-    const { nextReviewAt } = await reviewCard.execute({ userId: 'user-1', cardId, rating: 'good' });
+    const { dueAt } = await reviewCard.execute({ userId: 'user-1', cardId, rating: 'good' });
 
-    expect(nextReviewAt).toEqual(new Date(START.getTime() + 3 * DAY_MS));
+    expect(dueAt).toEqual(new Date(START.getTime() + 3 * DAY_MS));
     expect((await cards.findById(cardId))?.schedule.reviewCount).toBe(1);
   });
 

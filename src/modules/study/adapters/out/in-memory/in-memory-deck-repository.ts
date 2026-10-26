@@ -14,4 +14,17 @@ export class InMemoryDeckRepository implements DeckRepository {
   findById(id: string): Promise<Deck | null> {
     return Promise.resolve(this.decks.get(id) ?? null);
   }
+
+  findByOwner(ownerId: string): Promise<Deck[]> {
+    const owned = [...this.decks.values()]
+      .filter((deck) => deck.isOwnedBy(ownerId))
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+    return Promise.resolve(owned);
+  }
+
+  delete(id: string): Promise<void> {
+    this.decks.delete(id);
+    return Promise.resolve();
+  }
 }

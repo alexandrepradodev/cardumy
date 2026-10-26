@@ -13,6 +13,14 @@ export class InMemoryCardRepository implements CardRepository {
     return Promise.resolve(this.cards.get(id) ?? null);
   }
 
+  findByDeck(deckId: string): Promise<Card[]> {
+    const inDeck = [...this.cards.values()]
+      .filter((card) => card.deckId === deckId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+    return Promise.resolve(inDeck);
+  }
+
   findDueByDeck(deckId: string, now: Date, limit: number): Promise<Card[]> {
     const due = [...this.cards.values()]
       .filter((card) => card.deckId === deckId && card.isDue(now))
@@ -20,5 +28,19 @@ export class InMemoryCardRepository implements CardRepository {
       .slice(0, limit);
 
     return Promise.resolve(due);
+  }
+
+  delete(id: string): Promise<void> {
+    this.cards.delete(id);
+    return Promise.resolve();
+  }
+
+  deleteByDeck(deckId: string): Promise<void> {
+    for (const card of this.cards.values()) {
+      if (card.deckId === deckId) {
+        this.cards.delete(card.id);
+      }
+    }
+    return Promise.resolve();
   }
 }
