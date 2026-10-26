@@ -4,8 +4,9 @@ import { cardRoutes } from '../../modules/study/adapters/in/http/card-routes.js'
 import { deckRoutes } from '../../modules/study/adapters/in/http/deck-routes.js';
 import { type Container, createContainer } from '../container.js';
 import { registerCurrentUser } from './current-user.js';
+import { registerDocs } from './docs.js';
 import { registerErrorHandling } from './error-handling.js';
-import { registerHealthRoutes } from './health-routes.js';
+import { healthRoutes } from './health-routes.js';
 
 export interface BuildAppOptions extends FastifyServerOptions {
   container?: Container;
@@ -22,7 +23,9 @@ export function buildApp({
 
   registerErrorHandling(app);
   registerCurrentUser(app);
-  registerHealthRoutes(app);
+  // Plugins load in order: docs first, so they see every route below.
+  registerDocs(app);
+  void app.register(healthRoutes);
   void app.register(deckRoutes, { study: container.study });
   void app.register(cardRoutes, { study: container.study });
 
