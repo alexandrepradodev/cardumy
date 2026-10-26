@@ -1,0 +1,102 @@
+import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Type } from 'typebox';
+
+import { authenticate } from '../../../../../infra/http/current-user.js';
+import type { StudyUseCases } from '../../../study-module.js';
+import {
+  CardBody,
+  CardParams,
+  CardResponse,
+  DeckParams,
+  DueCardsQuery,
+  ReviewBody,
+  toCardResponse,
+} from './schemas.js';
+
+interface CardRoutesOptions {
+  study: StudyUseCases;
+}
+
+// Cards are created and listed under their deck (/decks/:deckId/cards),
+// but have their own address once they exist (/cards/:cardId), because a
+// card is its own aggregate (ADR 0005).
+export const cardRoutes: FastifyPluginAsyncTypebox<CardRoutesOptions> = (app, { study }) => {
+  app.addHook('onRequest', authenticate);
+
+  app.post(
+    '/decks/:deckId/cards',
+    { schema: { params: DeckParams, body: CardBody, response: { 201: CardResponse } } },
+    async (request, reply) => {
+      const card = await study.addCard.execute({
+        userId: request.userId,
+        deckId: request.params.deckId,
+        ...request.body,
+      });
+      return reply.status(201).send(toCardResponse(card));
+    },
+  );
+
+  app.get(
+    '/decks/:deckId/cards',
+    { schema: { params: DeckParams, response: { 200: Type.Array(CardResponse) } } },
+    async (request) => {
+      const cards = await study.listCards.execute({
+        userId: request.userId,
+        deckId: request.params.deckId,
+      });
+      return cards.map(toCardResponse);
+    },
+  );
+
+  app.get(
+    '/decks/:deckId/cards/due',
+    {
+      schema: {
+        params: DeckParams,
+        querystring: DueCardsQuery,
+        response: { 200: Type.Array(CardResponse) },
+      },
+    },
+    async (request) => {
+      const cards = await study.listDueCards.execute({
+        userId: request.userId,
+        deckId: request.params.deckId,
+        limit: request.query.limit,
+      });
+      return cards.map(toCardResponse);
+    },
+  );
+
+  app.patch(
+    '/cards/:cardId',
+    { schema: { params: CardParams, body: CardBody, response: { 200: CardResponse } } },
+    async (request) => {
+      const card = await study.editCard.execute({
+        userId: request.userId,
+        cardId: request.params.cardId,
+        ...request.body,
+      });
+      return toCardResponse(card);
+    },
+  );
+
+  app.delete('/cards/:cardId', { schema: { params: CardParams } }, async (request, reply) => {
+    await study.deleteCard.execute({ userId: request.userId, cardId: request.params.cardId });
+    return reply.status(204).send();
+  });
+
+  app.post(
+    '/cards/:cardId/reviews',
+    { schema: { params: CardParams, body: ReviewBody, response: { 200: CardResponse } } },
+    async (request) => {
+      const card = await study.reviewCard.execute({
+        userId: request.userId,
+        cardId: request.params.cardId,
+        rating: request.body.rating,
+      });
+      return toCardResponse(card);
+    },
+  );
+
+  return Promise.resolve();
+};

@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from 'fastify';
 
+import { cardRoutes } from '../../modules/study/adapters/in/http/card-routes.js';
 import { deckRoutes } from '../../modules/study/adapters/in/http/deck-routes.js';
 import { type Container, createContainer } from '../container.js';
 import { registerCurrentUser } from './current-user.js';
@@ -23,6 +24,7 @@ export function buildApp({
   registerCurrentUser(app);
   registerHealthRoutes(app);
   void app.register(deckRoutes, { study: container.study });
+  void app.register(cardRoutes, { study: container.study });
 
   return app;
 }
