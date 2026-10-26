@@ -6,4 +6,7 @@ import type { Deck } from '../../domain/deck.js';
 export interface DeckRepository {
   save(deck: Deck): Promise<void>;
   findById(id: string): Promise<Deck | null>;
+  // Decks of a user, oldest first.
+  findByOwner(ownerId: string): Promise<Deck[]>;
+  delete(id: string): Promise<void>;
 }

@@ -7,7 +7,7 @@ describe('CreateDeck', () => {
   it('creates and stores a deck for the owner', async () => {
     const { createDeck, decks } = makeStudyKit();
 
-    const { deckId } = await createDeck.execute({ ownerId: 'user-1', name: ' English ' });
+    const { id: deckId } = await createDeck.execute({ ownerId: 'user-1', name: ' English ' });
 
     const deck = await decks.findById(deckId);
     expect(deck?.name.value).toBe('English');

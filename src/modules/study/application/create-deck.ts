@@ -3,14 +3,11 @@ import { Deck } from '../domain/deck.js';
 import type { Clock } from './ports/clock.js';
 import type { DeckRepository } from './ports/deck-repository.js';
 import type { IdGenerator } from './ports/id-generator.js';
+import { type DeckView, toDeckView } from './views.js';
 
 export interface CreateDeckInput {
   ownerId: string;
   name: string;
-}
-
-export interface CreateDeckOutput {
-  deckId: string;
 }
 
 // Use case: one user action, written as a short recipe.
@@ -22,7 +19,7 @@ export class CreateDeck {
     private readonly ids: IdGenerator,
   ) {}
 
-  async execute(input: CreateDeckInput): Promise<CreateDeckOutput> {
+  async execute(input: CreateDeckInput): Promise<DeckView> {
     const deck = Deck.create({
       id: this.ids.next(),
       ownerId: input.ownerId,
@@ -32,6 +29,6 @@ export class CreateDeck {
 
     await this.decks.save(deck);
 
-    return { deckId: deck.id };
+    return toDeckView(deck);
   }
 }

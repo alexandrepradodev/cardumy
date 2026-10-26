@@ -1,13 +1,16 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyPluginAsync } from 'fastify';
 
 // Liveness probe: answers "is this process able to serve HTTP?".
 // It deliberately does not touch Postgres or Redis, so a slow database
 // never makes the platform restart a healthy API process.
-export function registerHealthRoutes(app: FastifyInstance): void {
+export const healthRoutes: FastifyPluginAsync = (app) => {
   app.get(
     '/health',
     {
       schema: {
+        tags: ['system'],
+        summary: 'Liveness check',
+        security: [],
         response: {
           200: {
             type: 'object',
@@ -19,4 +22,6 @@ export function registerHealthRoutes(app: FastifyInstance): void {
     },
     () => ({ status: 'ok' }),
   );
-}
+
+  return Promise.resolve();
+};
