@@ -1,5 +1,6 @@
 import { InMemoryCardRepository } from '../../src/modules/study/adapters/out/in-memory/in-memory-card-repository.js';
 import { InMemoryDeckRepository } from '../../src/modules/study/adapters/out/in-memory/in-memory-deck-repository.js';
+import { InMemoryTransactionRunner } from '../../src/modules/study/adapters/out/in-memory/in-memory-transaction-runner.js';
 import { createStudyUseCases } from '../../src/modules/study/study-module.js';
 import { FixedClock } from './fixed-clock.js';
 import { SequentialIdGenerator } from './sequential-id-generator.js';
@@ -14,5 +15,16 @@ export function makeStudyKit() {
   const clock = new FixedClock(START);
   const ids = new SequentialIdGenerator();
 
-  return { decks, cards, clock, ...createStudyUseCases({ decks, cards, clock, ids }) };
+  return {
+    decks,
+    cards,
+    clock,
+    ...createStudyUseCases({
+      decks,
+      cards,
+      clock,
+      ids,
+      transactions: new InMemoryTransactionRunner({ decks, cards }),
+    }),
+  };
 }

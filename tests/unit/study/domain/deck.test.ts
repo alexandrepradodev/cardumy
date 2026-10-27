@@ -40,3 +40,19 @@ describe('Deck', () => {
     expect(deck.isOwnedBy('user-2')).toBe(false);
   });
 });
+
+describe('Deck.restore', () => {
+  it('rebuilds a stored deck keeping its original creation date', () => {
+    const storedAt = new Date('2026-01-01T00:00:00Z');
+
+    const deck = Deck.restore({
+      id: 'deck-9',
+      ownerId: 'user-1',
+      name: DeckName.create('Old deck'),
+      createdAt: storedAt,
+    });
+
+    expect(deck.createdAt).toEqual(storedAt);
+    expect(deck.equals(makeDeck('deck-9'))).toBe(true);
+  });
+});

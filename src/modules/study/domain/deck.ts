@@ -21,6 +21,11 @@ export class Deck {
     return new Deck(id, ownerId, name, now);
   }
 
+  // Rebuilds a deck saved earlier. Unlike create(), it keeps the stored date.
+  static restore(props: { id: string; ownerId: string; name: DeckName; createdAt: Date }): Deck {
+    return new Deck(props.id, props.ownerId, props.name, props.createdAt);
+  }
+
   get name(): DeckName {
     return this._name;
   }

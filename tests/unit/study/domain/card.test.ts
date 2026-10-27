@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { CardText } from '../../../../src/modules/study/domain/card-text.js';
 import { Card } from '../../../../src/modules/study/domain/card.js';
+import { ReviewSchedule } from '../../../../src/modules/study/domain/review-schedule.js';
 
 const now = new Date('2026-10-23T10:00:00Z');
 
@@ -52,5 +53,33 @@ describe('Card review', () => {
     expect(card.isDue(now)).toBe(false);
     expect(card.isDue(card.schedule.dueAt)).toBe(true);
     expect(card.schedule.reviewCount).toBe(1);
+  });
+});
+
+describe('Card.restore', () => {
+  it('rebuilds a stored card with its review history, ready to be reviewed again', () => {
+    const reviewed = makeCard();
+    reviewed.review('good', now);
+
+    const restored = Card.restore({
+      id: reviewed.id,
+      deckId: reviewed.deckId,
+      front: reviewed.front,
+      back: reviewed.back,
+      schedule: ReviewSchedule.restore({
+        stabilityDays: reviewed.schedule.stabilityDays,
+        difficulty: reviewed.schedule.difficulty,
+        dueAt: reviewed.schedule.dueAt,
+        lastReviewedAt: reviewed.schedule.lastReviewedAt,
+        reviewCount: reviewed.schedule.reviewCount,
+        lapseCount: reviewed.schedule.lapseCount,
+      }),
+      createdAt: reviewed.createdAt,
+    });
+    const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+    restored.review('good', threeDaysLater);
+
+    expect(restored.schedule.reviewCount).toBe(2);
+    expect(restored.schedule.stabilityDays).toBeGreaterThan(reviewed.schedule.stabilityDays);
   });
 });

@@ -18,17 +18,25 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "test:watch": "vitest",
+    "test:watch": "vitest --project fast",
     "infra:up": "docker compose up -d --wait",
     "infra:down": "docker compose down",
-    "infra:logs": "docker compose logs -f"
+    "infra:logs": "docker compose logs -f",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "test:fast": "vitest run --project fast"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@testcontainers/postgresql": "^12.2.1",
     "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.10",
+    "testcontainers": "^12.2.1",
     "tsx": "^4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.72.0",
@@ -39,7 +47,9 @@
     "@fastify/swagger-ui": "^6.1.2",
     "@fastify/type-provider-typebox": "^6.3.0",
     "ajv-formats": "^3.0.1",
+    "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.7",
+    "pg": "^8.23.1",
     "typebox": "^1.4.2"
   }
 }
