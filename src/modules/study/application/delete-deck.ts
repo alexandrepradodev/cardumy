@@ -1,6 +1,6 @@
 import { findOwnedDeck } from './ownership.js';
-import type { CardRepository } from './ports/card-repository.js';
 import type { DeckRepository } from './ports/deck-repository.js';
+import type { TransactionRunner } from './ports/transaction-runner.js';
 
 export interface DeleteDeckInput {
   userId: string;
@@ -10,15 +10,17 @@ export interface DeleteDeckInput {
 export class DeleteDeck {
   constructor(
     private readonly decks: DeckRepository,
-    private readonly cards: CardRepository,
+    private readonly transactions: TransactionRunner,
   ) {}
 
   async execute(input: DeleteDeckInput): Promise<void> {
     const deck = await findOwnedDeck(this.decks, input.deckId, input.userId);
 
-    // Cards are separate aggregates, so the use case removes them too.
-    // In stage 3 both deletes run inside one database transaction.
-    await this.cards.deleteByDeck(deck.id);
-    await this.decks.delete(deck.id);
+    // Cards are separate aggregates, so removing them is an explicit step.
+    // Both deletes happen together or not at all: never a deck half deleted.
+    await this.transactions.run(async ({ decks, cards }) => {
+      await cards.deleteByDeck(deck.id);
+      await decks.delete(deck.id);
+    });
   }
 }

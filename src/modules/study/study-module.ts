@@ -11,6 +11,7 @@ import type { CardRepository } from './application/ports/card-repository.js';
 import type { Clock } from './application/ports/clock.js';
 import type { DeckRepository } from './application/ports/deck-repository.js';
 import type { IdGenerator } from './application/ports/id-generator.js';
+import type { TransactionRunner } from './application/ports/transaction-runner.js';
 import { RenameDeck } from './application/rename-deck.js';
 import { ReviewCard } from './application/review-card.js';
 
@@ -19,17 +20,18 @@ export interface StudyPorts {
   cards: CardRepository;
   clock: Clock;
   ids: IdGenerator;
+  transactions: TransactionRunner;
 }
 
 // Public face of the study module: plug in adapters for the ports and get
 // every use case back. infra/ decides which adapters; this file only wires.
-export function createStudyUseCases({ decks, cards, clock, ids }: StudyPorts) {
+export function createStudyUseCases({ decks, cards, clock, ids, transactions }: StudyPorts) {
   return {
     createDeck: new CreateDeck(decks, clock, ids),
     listDecks: new ListDecks(decks),
     getDeck: new GetDeck(decks),
     renameDeck: new RenameDeck(decks),
-    deleteDeck: new DeleteDeck(decks, cards),
+    deleteDeck: new DeleteDeck(decks, transactions),
     addCard: new AddCard(decks, cards, clock, ids),
     listCards: new ListCards(decks, cards),
     editCard: new EditCard(decks, cards),
