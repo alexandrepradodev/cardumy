@@ -27,6 +27,25 @@ export class Card {
     return new Card(id, deckId, front, back, ReviewSchedule.forNewCard(now), now);
   }
 
+  // Rebuilds a card saved earlier, with its review history.
+  static restore(props: {
+    id: string;
+    deckId: string;
+    front: CardText;
+    back: CardText;
+    schedule: ReviewSchedule;
+    createdAt: Date;
+  }): Card {
+    return new Card(
+      props.id,
+      props.deckId,
+      props.front,
+      props.back,
+      props.schedule,
+      props.createdAt,
+    );
+  }
+
   get front(): CardText {
     return this._front;
   }

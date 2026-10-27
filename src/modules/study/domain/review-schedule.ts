@@ -33,7 +33,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-interface ReviewScheduleProps {
+export interface ReviewScheduleProps {
   stabilityDays: number;
   difficulty: number;
   dueAt: Date;
@@ -59,6 +59,11 @@ export class ReviewSchedule {
     this.lastReviewedAt = props.lastReviewedAt;
     this.reviewCount = props.reviewCount;
     this.lapseCount = props.lapseCount;
+  }
+
+  // Rebuilds a schedule saved earlier (for example, read from the database).
+  static restore(props: ReviewScheduleProps): ReviewSchedule {
+    return new ReviewSchedule(props);
   }
 
   // A brand-new card is due right away.
