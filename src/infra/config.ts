@@ -8,9 +8,13 @@ const EnvSchema = Type.Object({
   LOG_LEVEL: Type.Enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'], {
     default: 'info',
   }),
+  DATABASE_URL: Type.Optional(Type.String({ pattern: '^postgres(ql)?://' })),
 });
 
-export type Config = Static<typeof EnvSchema>;
+// Matches compose.yaml, so `pnpm dev` works with no .env at all.
+const LOCAL_DATABASE_URL = 'postgres://cardumy:cardumy@localhost:5433/cardumy';
+
+export type Config = Static<typeof EnvSchema> & { DATABASE_URL: string };
 
 export class ConfigError extends Error {
   constructor(public readonly problems: string[]) {
@@ -38,5 +42,11 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     throw new ConfigError(problems);
   }
 
-  return candidate;
+  // Convenient locally, dangerous in production: there it must be explicit,
+  // or a misconfigured deploy would quietly look for a database on localhost.
+  if (candidate.DATABASE_URL === undefined && candidate.NODE_ENV === 'production') {
+    throw new ConfigError(['DATABASE_URL: is required in production']);
+  }
+
+  return { ...candidate, DATABASE_URL: candidate.DATABASE_URL ?? LOCAL_DATABASE_URL };
 }

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import type { FastifyInstance } from 'fastify';
 
+import { createInMemoryContainer } from '../../src/infra/container.js';
 import { buildApp } from '../../src/infra/http/app.js';
 
 interface OpenApiSpec {
@@ -14,7 +15,7 @@ describe('API docs', () => {
   let app: FastifyInstance;
 
   beforeEach(() => {
-    app = buildApp();
+    app = buildApp({ container: createInMemoryContainer() });
   });
 
   afterEach(async () => {

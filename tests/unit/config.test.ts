@@ -11,7 +11,19 @@ describe('loadConfig', () => {
       HOST: '0.0.0.0',
       PORT: 3000,
       LOG_LEVEL: 'info',
+      DATABASE_URL: 'postgres://cardumy:cardumy@localhost:5433/cardumy',
     });
+  });
+
+  it('requires DATABASE_URL in production', () => {
+    expect(() => loadConfig({ NODE_ENV: 'production' })).toThrow(/DATABASE_URL/);
+  });
+
+  it('accepts a Postgres DATABASE_URL and rejects anything else', () => {
+    const url = 'postgres://app:secret@db.internal:5432/cardumy';
+
+    expect(loadConfig({ NODE_ENV: 'production', DATABASE_URL: url }).DATABASE_URL).toBe(url);
+    expect(() => loadConfig({ DATABASE_URL: 'mysql://x' })).toThrow(/DATABASE_URL/);
   });
 
   it('converts PORT from text to number', () => {

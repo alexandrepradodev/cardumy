@@ -16,12 +16,14 @@ Requisitos: Node 24+, pnpm e Docker.
 pnpm install
 cp .env.example .env   # opcional: tudo tem valor padrão
 pnpm infra:up          # Postgres (porta 5433) e Redis (porta 6379)
+pnpm db:migrate        # cria ou atualiza as tabelas do banco
 pnpm dev               # API em http://localhost:3000
 curl localhost:3000/health
 ```
 
 Outros scripts: `pnpm test`, `pnpm lint`, `pnpm typecheck`, `pnpm format`,
-`pnpm build && pnpm start`, `pnpm infra:down`.
+`pnpm build && pnpm start`, `pnpm infra:down`, `pnpm test:fast` (sem Docker),
+`pnpm db:generate` (nova migração), `pnpm db:studio` (ver os dados).
 
 ## Temas cobertos
 
