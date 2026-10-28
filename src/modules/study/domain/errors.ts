@@ -1,11 +1,6 @@
-// Base class for every broken business rule in the study module.
-// Adapters translate it later (for example, HTTP turns it into a 400).
-export class DomainError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = new.target.name;
-  }
-}
+import { DomainError } from '../../../shared/errors.js';
+
+export { DomainError };
 
 export class InvalidDeckNameError extends DomainError {}
 

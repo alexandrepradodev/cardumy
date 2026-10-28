@@ -2,8 +2,7 @@ import { STATUS_CODES } from 'node:http';
 
 import type { FastifyError } from 'fastify';
 
-import { NotFoundError } from '../../modules/study/application/errors.js';
-import { DomainError } from '../../modules/study/domain/errors.js';
+import { DomainError, NotFoundError } from '../../shared/errors.js';
 import { UnauthorizedError } from './http-errors.js';
 
 // Problem Details (RFC 9457): one shape for every error of the API.
