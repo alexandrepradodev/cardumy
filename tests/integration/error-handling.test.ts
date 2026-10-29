@@ -5,13 +5,14 @@ import type { FastifyInstance } from 'fastify';
 import { authenticate } from '../../src/infra/http/current-user.js';
 import { createInMemoryContainer } from '../../src/infra/container.js';
 import { buildApp } from '../../src/infra/http/app.js';
+import { TEST_JWT_SECRET } from '../support/http-test-kit.js';
 import { EmailAlreadyInUseError } from '../../src/modules/accounts/application/errors.js';
 import { DeckNotFoundError } from '../../src/modules/study/application/errors.js';
 import { InvalidDeckNameError } from '../../src/modules/study/domain/errors.js';
 
 // Test-only routes that throw each kind of error, to check how the API answers.
 function buildAppWithTestRoutes(): FastifyInstance {
-  const app = buildApp({ container: createInMemoryContainer() });
+  const app = buildApp({ container: createInMemoryContainer(), jwtSecret: TEST_JWT_SECRET });
 
   app.get('/test/domain-error', () => {
     throw new InvalidDeckNameError('Deck name cannot be empty');

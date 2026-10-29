@@ -18,6 +18,7 @@ try {
 // run once per deploy, not by every API process that starts.
 const app = buildApp({
   container: createPostgresContainer(config.DATABASE_URL),
+  jwtSecret: config.JWT_SECRET,
   logger: { level: config.LOG_LEVEL },
 });
 

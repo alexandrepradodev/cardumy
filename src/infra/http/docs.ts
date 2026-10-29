@@ -23,6 +23,7 @@ export function registerDocs(app: FastifyInstance): void {
         { name: 'decks', description: 'Create and organize decks' },
         { name: 'cards', description: 'Cards inside a deck' },
         { name: 'study', description: 'Review cards and see what is due' },
+        { name: 'auth', description: 'Sign up and log in' },
         { name: 'system', description: 'Operational endpoints' },
       ],
       components: {

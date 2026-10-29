@@ -4,6 +4,7 @@ import type { FastifyInstance } from 'fastify';
 
 import { createInMemoryContainer } from '../../src/infra/container.js';
 import { buildApp } from '../../src/infra/http/app.js';
+import { TEST_JWT_SECRET } from '../support/http-test-kit.js';
 
 interface OpenApiSpec {
   openapi: string;
@@ -15,7 +16,7 @@ describe('API docs', () => {
   let app: FastifyInstance;
 
   beforeEach(() => {
-    app = buildApp({ container: createInMemoryContainer() });
+    app = buildApp({ container: createInMemoryContainer(), jwtSecret: TEST_JWT_SECRET });
   });
 
   afterEach(async () => {
@@ -35,6 +36,8 @@ describe('API docs', () => {
 
     expect(spec.openapi).toBe('3.1.0');
     expect(Object.keys(spec.paths).sort()).toEqual([
+      '/auth/login',
+      '/auth/register',
       '/cards/{cardId}',
       '/cards/{cardId}/reviews',
       '/decks',
@@ -46,11 +49,13 @@ describe('API docs', () => {
     expect(spec.paths['/cards/{cardId}/reviews']?.post?.tags).toEqual(['study']);
   });
 
-  it('documents the x-user-id header and keeps /health public', async () => {
+  it('documents the x-user-id header and keeps /health, sign up and login public', async () => {
     const response = await app.inject({ method: 'GET', url: '/docs/json' });
     const spec = response.json<OpenApiSpec>();
 
     expect(spec.components.securitySchemes.userId?.name).toBe('x-user-id');
     expect(spec.paths['/health']?.get?.security).toEqual([]);
+    expect(spec.paths['/auth/register']?.post?.security).toEqual([]);
+    expect(spec.paths['/auth/login']?.post?.security).toEqual([]);
   });
 });
