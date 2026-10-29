@@ -9,7 +9,7 @@ import { TEST_JWT_SECRET } from '../support/http-test-kit.js';
 interface OpenApiSpec {
   openapi: string;
   paths: Record<string, Record<string, { tags?: string[]; security?: unknown[] }>>;
-  components: { securitySchemes: Record<string, { name: string }> };
+  components: { securitySchemes: Record<string, unknown> };
 }
 
 describe('API docs', () => {
@@ -49,11 +49,15 @@ describe('API docs', () => {
     expect(spec.paths['/cards/{cardId}/reviews']?.post?.tags).toEqual(['study']);
   });
 
-  it('documents the x-user-id header and keeps /health, sign up and login public', async () => {
+  it('documents the Bearer token and keeps /health, sign up and login public', async () => {
     const response = await app.inject({ method: 'GET', url: '/docs/json' });
     const spec = response.json<OpenApiSpec>();
 
-    expect(spec.components.securitySchemes.userId?.name).toBe('x-user-id');
+    expect(spec.components.securitySchemes.bearerAuth).toEqual({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+    });
     expect(spec.paths['/health']?.get?.security).toEqual([]);
     expect(spec.paths['/auth/register']?.post?.security).toEqual([]);
     expect(spec.paths['/auth/login']?.post?.security).toEqual([]);

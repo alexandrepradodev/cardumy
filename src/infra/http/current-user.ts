@@ -1,4 +1,4 @@
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyError, FastifyInstance, FastifyRequest } from 'fastify';
 
 import { UnauthorizedError } from '../../shared/errors.js';
 
@@ -8,25 +8,48 @@ declare module 'fastify' {
   }
 }
 
-const USER_ID_HEADER = 'x-user-id';
-const USER_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+// Three named 401s, so a client can tell "log in again" (expired) apart from
+// "you never sent a token" or "this token is not ours".
+export class MissingTokenError extends UnauthorizedError {
+  constructor() {
+    super('Send an access token in the header "Authorization: Bearer <token>"');
+  }
+}
+
+export class ExpiredTokenError extends UnauthorizedError {
+  constructor() {
+    super('The access token has expired, log in again');
+  }
+}
+
+export class InvalidTokenError extends UnauthorizedError {
+  constructor() {
+    super('The access token is not valid');
+  }
+}
 
 export function registerCurrentUser(app: FastifyInstance): void {
   app.decorateRequest('userId', '');
 }
 
-// TEMPORARY (stage 2): trusts whatever user the client claims to be, so it is
-// NOT secure. It only lives at the HTTP edge; stage 3 swaps it for a JWT check
-// and no use case changes.
-export function authenticate(request: FastifyRequest): Promise<void> {
-  const header = request.headers[USER_ID_HEADER];
-
-  if (typeof header !== 'string' || !USER_ID_PATTERN.test(header)) {
-    return Promise.reject(
-      new UnauthorizedError(`Send the ${USER_ID_HEADER} header to identify the user`),
-    );
+// Hook for protected routes: checks the token's signature and expiry, then
+// exposes the user id. Use cases keep receiving a plain userId, so swapping
+// the stage 2 x-user-id header for this changed nothing inside the modules.
+export async function authenticate(request: FastifyRequest): Promise<void> {
+  try {
+    const { sub } = await request.jwtVerify<{ sub: string }>();
+    request.userId = sub;
+  } catch (error) {
+    throw toUnauthorized(error);
   }
+}
 
-  request.userId = header;
-  return Promise.resolve();
+// Same idea as the 23505 translation in the users repository: the library's
+// error codes stay here, the rest of the app sees our own errors.
+function toUnauthorized(error: unknown): Error {
+  const code = (error as Partial<FastifyError>).code ?? '';
+  if (code === 'FST_JWT_NO_AUTHORIZATION_IN_HEADER') return new MissingTokenError();
+  if (code === 'FST_JWT_AUTHORIZATION_TOKEN_EXPIRED') return new ExpiredTokenError();
+  if (code.startsWith('FST_JWT_')) return new InvalidTokenError();
+  return error instanceof Error ? error : new Error(String(error));
 }

@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import type { FastifyInstance } from 'fastify';
 
-import { authenticate } from '../../src/infra/http/current-user.js';
 import { createInMemoryContainer } from '../../src/infra/container.js';
 import { buildApp } from '../../src/infra/http/app.js';
 import { TEST_JWT_SECRET } from '../support/http-test-kit.js';
@@ -39,7 +38,6 @@ function buildAppWithTestRoutes(): FastifyInstance {
     },
     () => ({ ok: true }),
   );
-  app.get('/test/whoami', { onRequest: authenticate }, (request) => ({ userId: request.userId }));
 
   return app;
 }
@@ -115,47 +113,5 @@ describe('error handling (Problem Details)', () => {
     expect(response.statusCode).toBe(500);
     expect(response.json()).toMatchObject({ code: 'INTERNAL_ERROR' });
     expect(response.body).not.toContain('hunter2');
-  });
-});
-
-describe('temporary authentication (x-user-id)', () => {
-  let app: FastifyInstance;
-
-  beforeEach(() => {
-    app = buildAppWithTestRoutes();
-  });
-
-  afterEach(async () => {
-    await app.close();
-  });
-
-  it('identifies the user from the header', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/test/whoami',
-      headers: { 'x-user-id': 'alexandre' },
-    });
-
-    expect(response.json()).toEqual({ userId: 'alexandre' });
-  });
-
-  it.each([
-    ['missing', undefined],
-    ['invalid', 'not a valid id!'],
-  ])('answers 401 when the header is %s', async (_case, header) => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/test/whoami',
-      headers: header === undefined ? {} : { 'x-user-id': header },
-    });
-
-    expect(response.statusCode).toBe(401);
-    expect(response.json()).toMatchObject({ code: 'UnauthorizedError' });
-  });
-
-  it('keeps /health public', async () => {
-    const response = await app.inject({ method: 'GET', url: '/health' });
-
-    expect(response.statusCode).toBe(200);
   });
 });

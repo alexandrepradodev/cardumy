@@ -4,8 +4,7 @@ import { beforeEach, describe, expect, inject, it } from 'vitest';
 import { createPostgresContainer } from '../../../src/infra/container.js';
 import { connectDatabase } from '../../../src/infra/database.js';
 import { buildApp } from '../../../src/infra/http/app.js';
-import { TEST_JWT_SECRET } from '../../support/http-test-kit.js';
-import { asUser } from '../../support/http-test-kit.js';
+import { asUser, TEST_JWT_SECRET } from '../../support/http-test-kit.js';
 
 // The real app, wired exactly like main-api.ts: HTTP + use cases + Postgres.
 function startApi() {
@@ -17,7 +16,7 @@ function startApi() {
 
 beforeEach(async () => {
   const connection = connectDatabase(inject('databaseUrl'));
-  await connection.db.execute(sql`TRUNCATE cards, decks`);
+  await connection.db.execute(sql`TRUNCATE cards, decks, users`);
   await connection.close();
 });
 
@@ -59,6 +58,34 @@ describe('the API on Postgres', () => {
     expect(cards.json()).toEqual([
       expect.objectContaining({ id: card.id, front: 'to be', reviewCount: 1 }),
     ]);
+  });
+
+  it('takes a new user from sign up to their first deck, end to end', async () => {
+    const api = startApi();
+    const credentials = { email: 'ana@example.com', password: 'secret-123' };
+
+    const signUp = await api.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: credentials,
+    });
+    const login = await api.inject({ method: 'POST', url: '/auth/login', payload: credentials });
+    const { accessToken } = login.json<{ accessToken: string }>();
+    const authorization = `Bearer ${accessToken}`;
+    await api.inject({
+      method: 'POST',
+      url: '/decks',
+      headers: { authorization },
+      payload: { name: 'English' },
+    });
+    const decks = await api.inject({ method: 'GET', url: '/decks', headers: { authorization } });
+    const anonymous = await api.inject({ method: 'GET', url: '/decks' });
+    await api.close();
+
+    expect(signUp.statusCode).toBe(201);
+    expect(login.statusCode).toBe(200);
+    expect(decks.json()).toEqual([expect.objectContaining({ name: 'English' })]);
+    expect(anonymous.statusCode).toBe(401);
   });
 
   it('answers 404, not 500, for an id that is not a uuid', async () => {
