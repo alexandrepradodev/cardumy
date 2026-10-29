@@ -1,12 +1,6 @@
-// Something the use case looked for does not exist (or belongs to someone
-// else, which we report the same way so ids of other users never leak).
-// Adapters translate it later (for example, HTTP turns it into a 404).
-export class NotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = new.target.name;
-  }
-}
+import { NotFoundError } from '../../../shared/errors.js';
+
+export { NotFoundError };
 
 export class DeckNotFoundError extends NotFoundError {
   constructor(deckId: string) {

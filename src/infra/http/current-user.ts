@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 
-import { UnauthorizedError } from './http-errors.js';
+import { UnauthorizedError } from '../../shared/errors.js';
 
 declare module 'fastify' {
   interface FastifyRequest {

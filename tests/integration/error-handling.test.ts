@@ -5,18 +5,23 @@ import type { FastifyInstance } from 'fastify';
 import { authenticate } from '../../src/infra/http/current-user.js';
 import { createInMemoryContainer } from '../../src/infra/container.js';
 import { buildApp } from '../../src/infra/http/app.js';
+import { TEST_JWT_SECRET } from '../support/http-test-kit.js';
+import { EmailAlreadyInUseError } from '../../src/modules/accounts/application/errors.js';
 import { DeckNotFoundError } from '../../src/modules/study/application/errors.js';
 import { InvalidDeckNameError } from '../../src/modules/study/domain/errors.js';
 
 // Test-only routes that throw each kind of error, to check how the API answers.
 function buildAppWithTestRoutes(): FastifyInstance {
-  const app = buildApp({ container: createInMemoryContainer() });
+  const app = buildApp({ container: createInMemoryContainer(), jwtSecret: TEST_JWT_SECRET });
 
   app.get('/test/domain-error', () => {
     throw new InvalidDeckNameError('Deck name cannot be empty');
   });
   app.get('/test/not-found', () => {
     throw new DeckNotFoundError('deck-42');
+  });
+  app.get('/test/conflict', () => {
+    throw new EmailAlreadyInUseError();
   });
   app.get('/test/crash', () => {
     throw new Error('database password is hunter2');
@@ -73,6 +78,17 @@ describe('error handling (Problem Details)', () => {
       status: 404,
       code: 'DeckNotFoundError',
       detail: 'Deck deck-42 not found',
+    });
+  });
+
+  it('answers a clash with existing data with 409', async () => {
+    const response = await app.inject({ method: 'GET', url: '/test/conflict' });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({
+      status: 409,
+      code: 'EmailAlreadyInUseError',
+      detail: 'This email is already in use',
     });
   });
 

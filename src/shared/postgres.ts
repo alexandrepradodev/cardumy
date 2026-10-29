@@ -13,3 +13,19 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 export function isUuid(value: string): boolean {
   return UUID_PATTERN.test(value);
 }
+
+const UNIQUE_VIOLATION = '23505';
+
+// True when Postgres refused a write because it would break the given unique
+// index. Drizzle wraps the driver error, so the Postgres one is in `cause`.
+export function isUniqueViolation(error: unknown, constraint: string): boolean {
+  const pgError: unknown = error instanceof Error && error.cause ? error.cause : error;
+  return (
+    typeof pgError === 'object' &&
+    pgError !== null &&
+    'code' in pgError &&
+    pgError.code === UNIQUE_VIOLATION &&
+    'constraint' in pgError &&
+    pgError.constraint === constraint
+  );
+}

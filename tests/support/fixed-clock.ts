@@ -1,4 +1,4 @@
-import type { Clock } from '../../src/modules/study/application/ports/clock.js';
+import type { Clock } from '../../src/shared/ports/clock.js';
 
 // Test double: a clock that only moves when the test says so.
 export class FixedClock implements Clock {

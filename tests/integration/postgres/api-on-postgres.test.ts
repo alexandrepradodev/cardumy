@@ -4,11 +4,15 @@ import { beforeEach, describe, expect, inject, it } from 'vitest';
 import { createPostgresContainer } from '../../../src/infra/container.js';
 import { connectDatabase } from '../../../src/infra/database.js';
 import { buildApp } from '../../../src/infra/http/app.js';
+import { TEST_JWT_SECRET } from '../../support/http-test-kit.js';
 import { asUser } from '../../support/http-test-kit.js';
 
 // The real app, wired exactly like main-api.ts: HTTP + use cases + Postgres.
 function startApi() {
-  return buildApp({ container: createPostgresContainer(inject('databaseUrl')) });
+  return buildApp({
+    container: createPostgresContainer(inject('databaseUrl')),
+    jwtSecret: TEST_JWT_SECRET,
+  });
 }
 
 beforeEach(async () => {

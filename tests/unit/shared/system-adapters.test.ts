@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { SystemClock } from '../../../../src/modules/study/adapters/out/system/system-clock.js';
-import { UuidIdGenerator } from '../../../../src/modules/study/adapters/out/system/uuid-id-generator.js';
+import { SystemClock } from '../../../src/shared/adapters/system-clock.js';
+import { UuidIdGenerator } from '../../../src/shared/adapters/uuid-id-generator.js';
 
 describe('SystemClock', () => {
   it('returns the current time', () => {

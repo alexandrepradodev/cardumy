@@ -4,12 +4,13 @@ import type { FastifyInstance } from 'fastify';
 
 import { createInMemoryContainer } from '../../src/infra/container.js';
 import { buildApp } from '../../src/infra/http/app.js';
+import { TEST_JWT_SECRET } from '../support/http-test-kit.js';
 
 describe('GET /health', () => {
   let app: FastifyInstance;
 
   beforeEach(() => {
-    app = buildApp({ container: createInMemoryContainer() });
+    app = buildApp({ container: createInMemoryContainer(), jwtSecret: TEST_JWT_SECRET });
   });
 
   afterEach(async () => {

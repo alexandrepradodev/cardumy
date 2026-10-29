@@ -1,7 +1,7 @@
 import { parseRating } from '../domain/rating.js';
 import { findOwnedCard } from './ownership.js';
 import type { CardRepository } from './ports/card-repository.js';
-import type { Clock } from './ports/clock.js';
+import type { Clock } from '../../../shared/ports/clock.js';
 import type { DeckRepository } from './ports/deck-repository.js';
 import { type CardView, toCardView } from './views.js';
 

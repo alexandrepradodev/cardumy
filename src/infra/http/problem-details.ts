@@ -2,9 +2,12 @@ import { STATUS_CODES } from 'node:http';
 
 import type { FastifyError } from 'fastify';
 
-import { NotFoundError } from '../../modules/study/application/errors.js';
-import { DomainError } from '../../modules/study/domain/errors.js';
-import { UnauthorizedError } from './http-errors.js';
+import {
+  ConflictError,
+  DomainError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../../shared/errors.js';
 
 // Problem Details (RFC 9457): one shape for every error of the API.
 // "type: about:blank" means the HTTP status itself explains the problem;
@@ -60,6 +63,9 @@ export function toProblemDetails(error: unknown, instance: string): ProblemDetai
   }
   if (error instanceof NotFoundError) {
     return problem(404, error.name, error.message, instance);
+  }
+  if (error instanceof ConflictError) {
+    return problem(409, error.name, error.message, instance);
   }
   if (error instanceof UnauthorizedError) {
     return problem(401, error.name, error.message, instance);
