@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { IdGenerator } from '../../../application/ports/id-generator.js';
+import type { IdGenerator } from '../ports/id-generator.js';
 
 export class UuidIdGenerator implements IdGenerator {
   next(): string {

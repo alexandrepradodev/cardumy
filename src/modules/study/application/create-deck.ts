@@ -1,8 +1,8 @@
 import { DeckName } from '../domain/deck-name.js';
 import { Deck } from '../domain/deck.js';
-import type { Clock } from './ports/clock.js';
+import type { Clock } from '../../../shared/ports/clock.js';
 import type { DeckRepository } from './ports/deck-repository.js';
-import type { IdGenerator } from './ports/id-generator.js';
+import type { IdGenerator } from '../../../shared/ports/id-generator.js';
 import { type DeckView, toDeckView } from './views.js';
 
 export interface CreateDeckInput {

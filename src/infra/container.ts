@@ -4,8 +4,8 @@ import { InMemoryTransactionRunner } from '../modules/study/adapters/out/in-memo
 import { PostgresCardRepository } from '../modules/study/adapters/out/postgres/postgres-card-repository.js';
 import { PostgresDeckRepository } from '../modules/study/adapters/out/postgres/postgres-deck-repository.js';
 import { PostgresTransactionRunner } from '../modules/study/adapters/out/postgres/postgres-transaction-runner.js';
-import { SystemClock } from '../modules/study/adapters/out/system/system-clock.js';
-import { UuidIdGenerator } from '../modules/study/adapters/out/system/uuid-id-generator.js';
+import { SystemClock } from '../shared/adapters/system-clock.js';
+import { UuidIdGenerator } from '../shared/adapters/uuid-id-generator.js';
 import { createStudyUseCases, type StudyUseCases } from '../modules/study/study-module.js';
 import { connectDatabase } from './database.js';
 

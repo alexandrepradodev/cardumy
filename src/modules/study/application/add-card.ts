@@ -2,9 +2,9 @@ import { CardText } from '../domain/card-text.js';
 import { Card } from '../domain/card.js';
 import { findOwnedDeck } from './ownership.js';
 import type { CardRepository } from './ports/card-repository.js';
-import type { Clock } from './ports/clock.js';
+import type { Clock } from '../../../shared/ports/clock.js';
 import type { DeckRepository } from './ports/deck-repository.js';
-import type { IdGenerator } from './ports/id-generator.js';
+import type { IdGenerator } from '../../../shared/ports/id-generator.js';
 import { type CardView, toCardView } from './views.js';
 
 export interface AddCardInput {

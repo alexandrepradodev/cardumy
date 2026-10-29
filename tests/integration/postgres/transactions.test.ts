@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, inject, it } from 'vitest';
 
 import { connectDatabase, type DatabaseConnection } from '../../../src/infra/database.js';
-import { UuidIdGenerator } from '../../../src/modules/study/adapters/out/system/uuid-id-generator.js';
+import { UuidIdGenerator } from '../../../src/shared/adapters/uuid-id-generator.js';
 import { PostgresCardRepository } from '../../../src/modules/study/adapters/out/postgres/postgres-card-repository.js';
 import { PostgresDeckRepository } from '../../../src/modules/study/adapters/out/postgres/postgres-deck-repository.js';
 import { PostgresTransactionRunner } from '../../../src/modules/study/adapters/out/postgres/postgres-transaction-runner.js';

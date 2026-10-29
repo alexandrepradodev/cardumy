@@ -17,3 +17,20 @@ export class NotFoundError extends Error {
     this.name = new.target.name;
   }
 }
+
+// The request clashes with data that already exists (an email already in
+// use...). HTTP: 409.
+export class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = new.target.name;
+  }
+}
+
+// We could not confirm who the caller is (no token, wrong password...). HTTP: 401.
+export class UnauthorizedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = new.target.name;
+  }
+}
