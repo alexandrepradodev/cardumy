@@ -3,7 +3,8 @@ import { findOwnedCard } from './ownership.js';
 import type { CardRepository } from './ports/card-repository.js';
 import type { Clock } from '../../../shared/ports/clock.js';
 import type { DeckRepository } from './ports/deck-repository.js';
-import { type CardView, toCardView } from './views.js';
+import type { CardPresenter } from './card-presenter.js';
+import type { CardView } from './views.js';
 
 export interface ReviewCardInput {
   userId: string;
@@ -16,6 +17,7 @@ export class ReviewCard {
     private readonly decks: DeckRepository,
     private readonly cards: CardRepository,
     private readonly clock: Clock,
+    private readonly presenter: CardPresenter,
   ) {}
 
   async execute(input: ReviewCardInput): Promise<CardView> {
@@ -26,6 +28,6 @@ export class ReviewCard {
     card.review(rating, this.clock.now());
     await this.cards.save(card);
 
-    return toCardView(card);
+    return this.presenter.present(card);
   }
 }

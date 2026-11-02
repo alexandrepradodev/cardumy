@@ -17,7 +17,15 @@ describe('ListDueCards', () => {
     const due = await listDueCards.execute({ userId: 'user-1', deckId });
 
     expect(due).toEqual([
-      { id: cardId, deckId, front: 'to be', back: 'ser', dueAt: START, reviewCount: 0 },
+      {
+        id: cardId,
+        deckId,
+        front: 'to be',
+        back: 'ser',
+        dueAt: START,
+        reviewCount: 0,
+        imageUrl: null,
+      },
     ]);
   });
 

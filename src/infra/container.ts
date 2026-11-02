@@ -11,6 +11,7 @@ import { InMemoryTransactionRunner } from '../modules/study/adapters/out/in-memo
 import { PostgresCardRepository } from '../modules/study/adapters/out/postgres/postgres-card-repository.js';
 import { PostgresDeckRepository } from '../modules/study/adapters/out/postgres/postgres-deck-repository.js';
 import { PostgresTransactionRunner } from '../modules/study/adapters/out/postgres/postgres-transaction-runner.js';
+import { InMemoryFileStorage } from '../shared/adapters/in-memory-file-storage.js';
 import { SystemClock } from '../shared/adapters/system-clock.js';
 import { UuidIdGenerator } from '../shared/adapters/uuid-id-generator.js';
 import { createStudyUseCases, type StudyUseCases } from '../modules/study/study-module.js';
@@ -37,6 +38,8 @@ export function createPostgresContainer(databaseUrl: string): Container {
       decks: new PostgresDeckRepository(db),
       cards: new PostgresCardRepository(db),
       transactions: new PostgresTransactionRunner(db),
+      // Until the S3 adapter arrives (block C, step 4), files live in memory.
+      files: new InMemoryFileStorage(),
       clock,
       ids,
     }),
@@ -62,6 +65,7 @@ export function createInMemoryContainer(): Container {
       decks,
       cards,
       transactions: new InMemoryTransactionRunner({ decks, cards }),
+      files: new InMemoryFileStorage(),
       clock,
       ids,
     }),

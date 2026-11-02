@@ -1,3 +1,4 @@
+import { ImageOfAnotherCardError } from './errors.js';
 import type { ImageFile } from './image-file.js';
 
 const FILE_NAME = /^[A-Za-z0-9-]+\.(png|jpg|webp)$/;
@@ -25,6 +26,12 @@ export class CardImage {
   belongsTo(cardId: string): boolean {
     const prefix = `cards/${cardId}/`;
     return this.key.startsWith(prefix) && FILE_NAME.test(this.key.slice(prefix.length));
+  }
+
+  assertBelongsTo(cardId: string): void {
+    if (!this.belongsTo(cardId)) {
+      throw new ImageOfAnotherCardError('This image was not uploaded for this card');
+    }
   }
 
   equals(other: CardImage): boolean {

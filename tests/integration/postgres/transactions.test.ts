@@ -7,6 +7,7 @@ import { PostgresCardRepository } from '../../../src/modules/study/adapters/out/
 import { PostgresDeckRepository } from '../../../src/modules/study/adapters/out/postgres/postgres-deck-repository.js';
 import { PostgresTransactionRunner } from '../../../src/modules/study/adapters/out/postgres/postgres-transaction-runner.js';
 import { DeckNotFoundError } from '../../../src/modules/study/application/errors.js';
+import { InMemoryFileStorage } from '../../../src/shared/adapters/in-memory-file-storage.js';
 import { createStudyUseCases } from '../../../src/modules/study/study-module.js';
 import { FixedClock } from '../../support/fixed-clock.js';
 
@@ -30,6 +31,7 @@ function postgresStudy() {
     transactions: new PostgresTransactionRunner(db),
     clock: new FixedClock(new Date('2026-10-23T10:00:00Z')),
     ids: new UuidIdGenerator(),
+    files: new InMemoryFileStorage(),
   });
   return { decks, cards, study };
 }

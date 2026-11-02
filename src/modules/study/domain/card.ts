@@ -1,6 +1,5 @@
 import type { CardImage } from './card-image.js';
 import type { CardText } from './card-text.js';
-import { ImageOfAnotherCardError } from './errors.js';
 import type { Rating } from './rating.js';
 import { ReviewSchedule } from './review-schedule.js';
 
@@ -70,9 +69,7 @@ export class Card {
   // Replaces any previous image. Only an image uploaded for this very card is
   // accepted, so a user cannot point their card at someone else's file.
   attachImage(image: CardImage): void {
-    if (!image.belongsTo(this.id)) {
-      throw new ImageOfAnotherCardError('This image was not uploaded for this card');
-    }
+    image.assertBelongsTo(this.id);
     this._image = image;
   }
 
