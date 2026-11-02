@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import { CardImage } from '../../../../src/modules/study/domain/card-image.js';
 import { CardText } from '../../../../src/modules/study/domain/card-text.js';
 import { Card } from '../../../../src/modules/study/domain/card.js';
+import { ImageOfAnotherCardError } from '../../../../src/modules/study/domain/errors.js';
+import { ImageFile } from '../../../../src/modules/study/domain/image-file.js';
 import { ReviewSchedule } from '../../../../src/modules/study/domain/review-schedule.js';
 
 const now = new Date('2026-10-23T10:00:00Z');
@@ -81,5 +84,57 @@ describe('Card.restore', () => {
 
     expect(restored.schedule.reviewCount).toBe(2);
     expect(restored.schedule.stabilityDays).toBeGreaterThan(reviewed.schedule.stabilityDays);
+  });
+});
+
+describe('Card image', () => {
+  const png = ImageFile.create({ contentType: 'image/png', sizeBytes: 1024 });
+
+  it('starts without an image', () => {
+    expect(makeCard().image).toBeNull();
+  });
+
+  it('attaches an image uploaded for this card, replacing the previous one', () => {
+    const card = makeCard('card-1');
+
+    card.attachImage(CardImage.forCard('card-1', 'img-1', png));
+    card.attachImage(CardImage.forCard('card-1', 'img-2', png));
+
+    expect(card.image?.key).toBe('cards/card-1/img-2.png');
+  });
+
+  it('refuses an image uploaded for another card and keeps the current one', () => {
+    const card = makeCard('card-1');
+    card.attachImage(CardImage.forCard('card-1', 'img-1', png));
+
+    expect(() => {
+      card.attachImage(CardImage.forCard('card-2', 'img-9', png));
+    }).toThrow(ImageOfAnotherCardError);
+    expect(card.image?.key).toBe('cards/card-1/img-1.png');
+  });
+
+  it('removes its image', () => {
+    const card = makeCard('card-1');
+    card.attachImage(CardImage.forCard('card-1', 'img-1', png));
+
+    card.removeImage();
+
+    expect(card.image).toBeNull();
+  });
+
+  it('is restored with the image it had', () => {
+    const original = makeCard('card-1');
+
+    const restored = Card.restore({
+      id: original.id,
+      deckId: original.deckId,
+      front: original.front,
+      back: original.back,
+      schedule: original.schedule,
+      createdAt: original.createdAt,
+      image: CardImage.restore('cards/card-1/img-1.png'),
+    });
+
+    expect(restored.image?.key).toBe('cards/card-1/img-1.png');
   });
 });
