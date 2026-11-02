@@ -1,6 +1,6 @@
 # ADR 0008: identificação provisória pelo cabeçalho `x-user-id`
 
-- Status: aceito (temporário, substituído na etapa 3)
+- Status: substituído pelo ADR 0018
 - Data: 2026-10-26
 
 ## Contexto
