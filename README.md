@@ -21,6 +21,24 @@ pnpm dev               # API em http://localhost:3000
 curl localhost:3000/health
 ```
 
+A documentação interativa fica em http://localhost:3000/docs.
+
+## Autenticação
+
+As rotas de decks e cards exigem um access token (JWT). Para conseguir um:
+
+```bash
+curl -X POST localhost:3000/auth/register -H 'content-type: application/json' \
+  -d '{"email":"ana@example.com","password":"uma-senha-longa"}'
+curl -X POST localhost:3000/auth/login -H 'content-type: application/json' \
+  -d '{"email":"ana@example.com","password":"uma-senha-longa"}'
+# devolve { "accessToken": "...", "tokenType": "Bearer", "expiresIn": 3600 }
+curl localhost:3000/decks -H 'authorization: Bearer <accessToken>'
+```
+
+No `/docs`, faça o login, copie o `accessToken` e cole no botão **Authorize**.
+O token vale 1 hora. Em produção, defina `JWT_SECRET` (veja `.env.example`).
+
 Outros scripts: `pnpm test`, `pnpm lint`, `pnpm typecheck`, `pnpm format`,
 `pnpm build && pnpm start`, `pnpm infra:down`, `pnpm test:fast` (sem Docker),
 `pnpm db:generate` (nova migração), `pnpm db:studio` (ver os dados).

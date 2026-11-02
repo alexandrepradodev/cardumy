@@ -17,7 +17,8 @@ export const decks = pgTable(
   'decks',
   {
     id: uuid('id').primaryKey(),
-    // Text for now (x-user-id); becomes the accounts user id in block B.
+    // The accounts user id (the token's `sub`). No foreign key to users on
+    // purpose: a module never reaches into another module's tables (rule 5).
     ownerId: text('owner_id').notNull(),
     name: text('name').notNull(),
     createdAt: timestamptz('created_at').notNull(),

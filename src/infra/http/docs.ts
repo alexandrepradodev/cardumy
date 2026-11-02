@@ -2,7 +2,7 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import type { FastifyInstance } from 'fastify';
 
-export const USER_SECURITY = 'userId';
+export const BEARER_SECURITY = 'bearerAuth';
 
 // OpenAPI spec generated from the same TypeBox schemas that validate requests,
 // so the docs cannot drift from the code. UI at /docs, raw spec at /docs/json.
@@ -14,10 +14,11 @@ export function registerDocs(app: FastifyInstance): void {
       info: {
         title: 'Cardumy API',
         description:
-          'Flashcards with spaced repetition. Identify yourself with the temporary ' +
-          '`x-user-id` header (replaced by JWT in stage 3). Errors follow RFC 9457 ' +
-          '(Problem Details).',
-        version: '0.2.0',
+          'Flashcards with spaced repetition. Create an account (`POST /auth/register`), ' +
+          'log in (`POST /auth/login`) and send the access token as ' +
+          '`Authorization: Bearer <token>` (in this page: the Authorize button). ' +
+          'Errors follow RFC 9457 (Problem Details).',
+        version: '0.3.0',
       },
       tags: [
         { name: 'decks', description: 'Create and organize decks' },
@@ -28,10 +29,10 @@ export function registerDocs(app: FastifyInstance): void {
       ],
       components: {
         securitySchemes: {
-          [USER_SECURITY]: { type: 'apiKey', in: 'header', name: 'x-user-id' },
+          [BEARER_SECURITY]: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
         },
       },
-      security: [{ [USER_SECURITY]: [] }],
+      security: [{ [BEARER_SECURITY]: [] }],
     },
   });
 
