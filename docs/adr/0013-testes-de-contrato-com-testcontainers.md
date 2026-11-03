@@ -21,7 +21,8 @@ de desenvolvimento.
   contêiner é descartado no fim.
 - **Dois projetos no Vitest:** `fast` (unitários e HTTP em memória, sem Docker)
   e `postgres` (adaptadores, transações e API completa no banco), com arquivos
-  executados em sequência por compartilharem o banco.
+  executados em sequência por compartilharem o banco. (O projeto `postgres`
+  passou a se chamar `containers` ao ganhar o RustFS, ADR 0021.)
 - Scripts: `pnpm test` (tudo), `pnpm test:fast` e `pnpm test:watch` (só os
   rápidos).
 

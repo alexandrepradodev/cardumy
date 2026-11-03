@@ -33,6 +33,43 @@ services:
       timeout: 3s
       retries: 10
 
+  # S3-compatible object storage, standing in for Cloudflare R2 locally.
+  # RustFS instead of MinIO: MinIO stopped publishing its free images.
+  rustfs:
+    image: rustfs/rustfs:1.0.4
+    environment:
+      RUSTFS_ACCESS_KEY: cardumy
+      RUSTFS_SECRET_KEY: cardumy-local-secret
+    ports:
+      # 9000: the S3 API. 9001: the web console (log in with the keys above).
+      - '${S3_HOST_PORT:-9000}:9000'
+      - '${S3_CONSOLE_HOST_PORT:-9001}:9001'
+    volumes:
+      - rustfs-data:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-fs', 'http://localhost:9000/health']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot job: creates the bucket the API uses, then exits.
+  # Safe to run again: an existing bucket is left alone.
+  rustfs-init:
+    image: amazon/aws-cli:2.31.0
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: cardumy
+      AWS_SECRET_ACCESS_KEY: cardumy-local-secret
+      AWS_DEFAULT_REGION: us-east-1
+    entrypoint: ['sh', '-c']
+    command:
+      - >-
+        aws --endpoint-url http://rustfs:9000 s3api head-bucket --bucket cardumy 2>/dev/null ||
+        aws --endpoint-url http://rustfs:9000 s3api create-bucket --bucket cardumy
+
 volumes:
   postgres-data:
   redis-data:
+  rustfs-data:

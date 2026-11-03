@@ -1,3 +1,4 @@
+import type { CardImage } from './card-image.js';
 import type { CardText } from './card-text.js';
 import type { Rating } from './rating.js';
 import { ReviewSchedule } from './review-schedule.js';
@@ -21,10 +22,11 @@ export class Card {
     private _back: CardText,
     private _schedule: ReviewSchedule,
     readonly createdAt: Date,
+    private _image: CardImage | null,
   ) {}
 
   static create({ id, deckId, front, back, now }: CreateCardProps): Card {
-    return new Card(id, deckId, front, back, ReviewSchedule.forNewCard(now), now);
+    return new Card(id, deckId, front, back, ReviewSchedule.forNewCard(now), now, null);
   }
 
   // Rebuilds a card saved earlier, with its review history.
@@ -35,6 +37,7 @@ export class Card {
     back: CardText;
     schedule: ReviewSchedule;
     createdAt: Date;
+    image?: CardImage | null;
   }): Card {
     return new Card(
       props.id,
@@ -43,6 +46,7 @@ export class Card {
       props.back,
       props.schedule,
       props.createdAt,
+      props.image ?? null,
     );
   }
 
@@ -56,6 +60,21 @@ export class Card {
 
   get schedule(): ReviewSchedule {
     return this._schedule;
+  }
+
+  get image(): CardImage | null {
+    return this._image;
+  }
+
+  // Replaces any previous image. Only an image uploaded for this very card is
+  // accepted, so a user cannot point their card at someone else's file.
+  attachImage(image: CardImage): void {
+    image.assertBelongsTo(this.id);
+    this._image = image;
+  }
+
+  removeImage(): void {
+    this._image = null;
   }
 
   edit(front: CardText, back: CardText): void {

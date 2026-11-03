@@ -12,6 +12,7 @@ interface CardJson {
   back: string;
   dueAt: string;
   reviewCount: number;
+  imageUrl: string | null;
 }
 
 describe('card routes', () => {
@@ -69,6 +70,7 @@ describe('card routes', () => {
         back: 'ser / estar',
         dueAt: START.toISOString(),
         reviewCount: 0,
+        imageUrl: null,
       });
     });
 

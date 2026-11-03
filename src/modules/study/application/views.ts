@@ -17,13 +17,23 @@ export interface CardView {
   back: string;
   dueAt: Date;
   reviewCount: number;
+  // Temporary link to the card image in the storage, or null without one.
+  imageUrl: string | null;
+}
+
+export interface ImageUploadView {
+  key: string;
+  url: string;
+  method: 'PUT';
+  headers: Record<string, string>;
+  expiresAt: Date;
 }
 
 export function toDeckView(deck: Deck): DeckView {
   return { id: deck.id, name: deck.name.value, createdAt: deck.createdAt };
 }
 
-export function toCardView(card: Card): CardView {
+export function toCardView(card: Card, imageUrl: string | null): CardView {
   return {
     id: card.id,
     deckId: card.deckId,
@@ -31,5 +41,6 @@ export function toCardView(card: Card): CardView {
     back: card.back.value,
     dueAt: card.schedule.dueAt,
     reviewCount: card.schedule.reviewCount,
+    imageUrl,
   };
 }

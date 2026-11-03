@@ -5,7 +5,8 @@ import type { CardRepository } from './ports/card-repository.js';
 import type { Clock } from '../../../shared/ports/clock.js';
 import type { DeckRepository } from './ports/deck-repository.js';
 import type { IdGenerator } from '../../../shared/ports/id-generator.js';
-import { type CardView, toCardView } from './views.js';
+import type { CardPresenter } from './card-presenter.js';
+import type { CardView } from './views.js';
 
 export interface AddCardInput {
   userId: string;
@@ -20,6 +21,7 @@ export class AddCard {
     private readonly cards: CardRepository,
     private readonly clock: Clock,
     private readonly ids: IdGenerator,
+    private readonly presenter: CardPresenter,
   ) {}
 
   async execute(input: AddCardInput): Promise<CardView> {
@@ -35,6 +37,6 @@ export class AddCard {
 
     await this.cards.save(card);
 
-    return toCardView(card);
+    return this.presenter.present(card);
   }
 }

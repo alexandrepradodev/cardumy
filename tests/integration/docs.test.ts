@@ -39,6 +39,8 @@ describe('API docs', () => {
       '/auth/login',
       '/auth/register',
       '/cards/{cardId}',
+      '/cards/{cardId}/image',
+      '/cards/{cardId}/image/upload',
       '/cards/{cardId}/reviews',
       '/decks',
       '/decks/{deckId}',
