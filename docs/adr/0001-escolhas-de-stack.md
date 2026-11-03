@@ -24,7 +24,8 @@ escolhas estavam em aberto.
    orçamento. Vercel foi descartada: é serverless e não sustenta workers.
 5. **Arquivos: Cloudflare R2** pela API compatível com S3, atrás da porta
    `FileStorage`. Plano grátis e sem custo de saída de dados; MinIO no
-   Docker Compose para desenvolvimento local; na etapa AWS vira S3 só por
+   Docker Compose para desenvolvimento local (substituído pelo RustFS, ADR
+   0021); na etapa AWS vira S3 só por
    configuração. Uploads por URL pré-assinada, sem passar pela API.
 6. **E-mail: Resend**, atrás da porta `EmailSender`, sempre enviado por
    worker (nunca dentro da requisição). Mailpit no Docker Compose para ver os
