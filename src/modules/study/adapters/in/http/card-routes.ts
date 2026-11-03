@@ -2,16 +2,20 @@ import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from 'typebox';
 
 import { authenticate } from '../../../../../infra/http/current-user.js';
-import { commonErrors } from '../../../../../infra/http/problem-schema.js';
+import { commonErrors, ProblemResponse } from '../../../../../infra/http/problem-schema.js';
 import type { StudyUseCases } from '../../../study-module.js';
 import {
+  AttachImageBody,
   CardBody,
   CardParams,
   CardResponse,
   DeckParams,
   DueCardsQuery,
+  ImageUploadBody,
+  ImageUploadResponse,
   ReviewBody,
   toCardResponse,
+  toImageUploadResponse,
 } from './schemas.js';
 
 interface CardRoutesOptions {
@@ -138,6 +142,75 @@ export const cardRoutes: FastifyPluginAsyncTypebox<CardRoutesOptions> = (app, { 
         userId: request.userId,
         cardId: request.params.cardId,
         rating: request.body.rating,
+      });
+      return toCardResponse(card);
+    },
+  );
+
+  // Image upload in two steps. The file never passes through the API: the
+  // client sends it straight to the storage with the presigned URL.
+  app.post(
+    '/cards/:cardId/image/upload',
+    {
+      schema: {
+        tags: ['cards'],
+        summary: 'Step 1 of 2 of an image upload: get a presigned upload URL',
+        description:
+          'Declare the type and size of the file. Then PUT the file to `url` with `headers`, ' +
+          'and confirm with PUT /cards/:cardId/image. The card only changes on confirmation.',
+        params: CardParams,
+        body: ImageUploadBody,
+        response: { 200: ImageUploadResponse, ...commonErrors },
+      },
+    },
+    async (request) => {
+      const upload = await study.requestCardImageUpload.execute({
+        userId: request.userId,
+        cardId: request.params.cardId,
+        ...request.body,
+      });
+      return toImageUploadResponse(upload);
+    },
+  );
+
+  app.put(
+    '/cards/:cardId/image',
+    {
+      schema: {
+        tags: ['cards'],
+        summary: 'Step 2 of 2 of an image upload: attach the uploaded file to the card',
+        description:
+          'The API checks the file that really arrived in the storage before attaching it. ' +
+          'Replaces any previous image. Confirming the same key again changes nothing.',
+        params: CardParams,
+        body: AttachImageBody,
+        response: { 200: CardResponse, ...commonErrors, 409: ProblemResponse },
+      },
+    },
+    async (request) => {
+      const card = await study.attachCardImage.execute({
+        userId: request.userId,
+        cardId: request.params.cardId,
+        key: request.body.key,
+      });
+      return toCardResponse(card);
+    },
+  );
+
+  app.delete(
+    '/cards/:cardId/image',
+    {
+      schema: {
+        tags: ['cards'],
+        summary: 'Remove the image of a card (and delete its file)',
+        params: CardParams,
+        response: { 200: CardResponse, ...commonErrors },
+      },
+    },
+    async (request) => {
+      const card = await study.removeCardImage.execute({
+        userId: request.userId,
+        cardId: request.params.cardId,
       });
       return toCardResponse(card);
     },
