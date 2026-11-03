@@ -12,19 +12,25 @@ export default defineConfig({
         test: {
           name: 'fast',
           include: ['tests/**/*.test.ts'],
-          exclude: ['tests/integration/postgres/**'],
+          exclude: ['tests/integration/postgres/**', 'tests/integration/storage/**'],
         },
       },
       {
-        // Postgres adapters against a real database started by Testcontainers.
+        // Adapters against real Postgres and RustFS started by Testcontainers.
         extends: true,
         test: {
-          name: 'postgres',
-          include: ['tests/integration/postgres/**/*.test.ts'],
-          globalSetup: ['tests/support/postgres-global-setup.ts'],
-          // Files share one database, so they run one after the other.
+          name: 'containers',
+          include: [
+            'tests/integration/postgres/**/*.test.ts',
+            'tests/integration/storage/**/*.test.ts',
+          ],
+          globalSetup: [
+            'tests/support/postgres-global-setup.ts',
+            'tests/support/storage-global-setup.ts',
+          ],
+          // Files share one database and one bucket, so they run one after the other.
           fileParallelism: false,
-          // Pulling the image and starting Postgres can take a while the first time.
+          // Pulling the images and starting them can take a while the first time.
           hookTimeout: 120_000,
         },
       },

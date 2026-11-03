@@ -9,7 +9,10 @@ import { asUser, TEST_JWT_SECRET } from '../../support/http-test-kit.js';
 // The real app, wired exactly like main-api.ts: HTTP + use cases + Postgres.
 function startApi() {
   return buildApp({
-    container: createPostgresContainer(inject('databaseUrl')),
+    container: createPostgresContainer({
+      databaseUrl: inject('databaseUrl'),
+      storage: inject('storage'),
+    }),
     jwtSecret: TEST_JWT_SECRET,
   });
 }

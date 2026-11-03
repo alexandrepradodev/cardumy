@@ -17,7 +17,16 @@ try {
 // Migrations are not run here: they are a separate step (`pnpm db:migrate`),
 // run once per deploy, not by every API process that starts.
 const app = buildApp({
-  container: createPostgresContainer(config.DATABASE_URL),
+  container: createPostgresContainer({
+    databaseUrl: config.DATABASE_URL,
+    storage: {
+      endpoint: config.S3_ENDPOINT,
+      region: config.S3_REGION,
+      bucket: config.S3_BUCKET,
+      accessKeyId: config.S3_ACCESS_KEY_ID,
+      secretAccessKey: config.S3_SECRET_ACCESS_KEY,
+    },
+  }),
   jwtSecret: config.JWT_SECRET,
   logger: { level: config.LOG_LEVEL },
 });

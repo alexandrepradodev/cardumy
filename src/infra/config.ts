@@ -12,14 +12,37 @@ const EnvSchema = Type.Object({
   // Signs the access tokens. Anyone who knows it can forge a token for any
   // user, so it must be long, random and never committed.
   JWT_SECRET: Type.Optional(Type.String({ minLength: 32 })),
+  // Object storage speaking the S3 API: Cloudflare R2 in production
+  // (region "auto"), RustFS from compose.yaml locally.
+  S3_ENDPOINT: Type.Optional(Type.String({ pattern: '^https?://' })),
+  S3_REGION: Type.String({ minLength: 1, default: 'us-east-1' }),
+  S3_BUCKET: Type.String({ minLength: 1, default: 'cardumy' }),
+  S3_ACCESS_KEY_ID: Type.Optional(Type.String({ minLength: 1 })),
+  S3_SECRET_ACCESS_KEY: Type.Optional(Type.String({ minLength: 1 })),
 });
 
 // Matches compose.yaml, so `pnpm dev` works with no .env at all.
 const LOCAL_DATABASE_URL = 'postgres://cardumy:cardumy@localhost:5433/cardumy';
 // Public on purpose (it is in the repository), so it is only acceptable locally.
 const LOCAL_JWT_SECRET = 'local-development-only-jwt-secret-do-not-use';
+// RustFS from compose.yaml, with its local-only keys.
+const LOCAL_S3 = {
+  S3_ENDPOINT: 'http://localhost:9000',
+  S3_ACCESS_KEY_ID: 'cardumy',
+  S3_SECRET_ACCESS_KEY: 'cardumy-local-secret',
+};
 
-export type Config = Static<typeof EnvSchema> & { DATABASE_URL: string; JWT_SECRET: string };
+// Required in production, filled with a local default everywhere else.
+const REQUIRED_IN_PRODUCTION = [
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'S3_ENDPOINT',
+  'S3_ACCESS_KEY_ID',
+  'S3_SECRET_ACCESS_KEY',
+] as const;
+
+export type Config = Static<typeof EnvSchema> &
+  Record<(typeof REQUIRED_IN_PRODUCTION)[number], string>;
 
 export class ConfigError extends Error {
   constructor(public readonly problems: string[]) {
@@ -49,11 +72,12 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
 
   // Convenient locally, dangerous in production: there they must be explicit,
   // or a misconfigured deploy would quietly look for a database on localhost,
-  // or sign tokens with a secret anyone can read on GitHub.
+  // sign tokens with a secret anyone can read on GitHub, or upload files to
+  // a storage that does not exist.
   if (candidate.NODE_ENV === 'production') {
-    const missing = (['DATABASE_URL', 'JWT_SECRET'] as const)
-      .filter((key) => candidate[key] === undefined)
-      .map((key) => `${key}: is required in production`);
+    const missing = REQUIRED_IN_PRODUCTION.filter((key) => candidate[key] === undefined).map(
+      (key) => `${key}: is required in production`,
+    );
     if (missing.length > 0) {
       throw new ConfigError(missing);
     }
@@ -63,5 +87,8 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     ...candidate,
     DATABASE_URL: candidate.DATABASE_URL ?? LOCAL_DATABASE_URL,
     JWT_SECRET: candidate.JWT_SECRET ?? LOCAL_JWT_SECRET,
+    S3_ENDPOINT: candidate.S3_ENDPOINT ?? LOCAL_S3.S3_ENDPOINT,
+    S3_ACCESS_KEY_ID: candidate.S3_ACCESS_KEY_ID ?? LOCAL_S3.S3_ACCESS_KEY_ID,
+    S3_SECRET_ACCESS_KEY: candidate.S3_SECRET_ACCESS_KEY ?? LOCAL_S3.S3_SECRET_ACCESS_KEY,
   };
 }

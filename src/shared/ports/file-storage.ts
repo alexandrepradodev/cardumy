@@ -1,4 +1,4 @@
-// Port for an object storage (R2 in production, MinIO locally, memory in
+// Port for an object storage (R2 in production, RustFS locally, memory in
 // tests). Files are whole objects found by a key; the API never carries their
 // bytes: clients upload and download them directly through presigned URLs.
 
