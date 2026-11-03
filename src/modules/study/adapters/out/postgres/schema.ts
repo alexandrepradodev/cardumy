@@ -45,6 +45,9 @@ export const cards = pgTable(
     lastReviewedAt: timestamptz('last_reviewed_at'),
     reviewCount: integer('review_count').notNull(),
     lapseCount: integer('lapse_count').notNull(),
+    // Only the key of the image in the object storage, never the file itself.
+    // Null when the card has no image.
+    imageKey: text('image_key'),
   },
   // "Cards of this deck due before now, oldest first" reads this index in order.
   (table) => [index('cards_deck_id_due_at_idx').on(table.deckId, table.dueAt)],

@@ -4,10 +4,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { CardRepository } from '../../../src/modules/study/application/ports/card-repository.js';
 import type { DeckRepository } from '../../../src/modules/study/application/ports/deck-repository.js';
+import { CardImage } from '../../../src/modules/study/domain/card-image.js';
 import { CardText } from '../../../src/modules/study/domain/card-text.js';
 import { Card } from '../../../src/modules/study/domain/card.js';
 import { DeckName } from '../../../src/modules/study/domain/deck-name.js';
 import { Deck } from '../../../src/modules/study/domain/deck.js';
+import { ImageFile } from '../../../src/modules/study/domain/image-file.js';
 
 export interface StudyRepositories {
   decks: DeckRepository;
@@ -20,6 +22,11 @@ const at = (days: number) => new Date(T0.getTime() + days * DAY_MS);
 
 function makeDeck(ownerId = 'user-1', createdAt = T0, name = 'English'): Deck {
   return Deck.create({ id: randomUUID(), ownerId, name: DeckName.create(name), now: createdAt });
+}
+
+function imageFor(card: Card): CardImage {
+  const file = ImageFile.create({ contentType: 'image/png', sizeBytes: 1024 });
+  return CardImage.forCard(card.id, randomUUID(), file);
 }
 
 function makeCard(deckId: string, front = 'to be', createdAt = T0): Card {
@@ -173,6 +180,58 @@ export function studyRepositoriesContract(
         await cards.deleteByDeck(deck.id);
         expect(await cards.findByDeck(deck.id)).toEqual([]);
         expect(await cards.findById(elsewhere.id)).not.toBeNull();
+      });
+
+      it('keeps the image key when saved and read back', async () => {
+        const deck = await savedDeck();
+        const card = makeCard(deck.id);
+        const image = imageFor(card);
+        card.attachImage(image);
+
+        await cards.save(card);
+        const found = await cards.findById(card.id);
+
+        expect(found?.image?.key).toBe(image.key);
+      });
+
+      it('reads a card without image as null', async () => {
+        const deck = await savedDeck();
+        const card = makeCard(deck.id);
+
+        await cards.save(card);
+
+        expect((await cards.findById(card.id))?.image).toBeNull();
+      });
+
+      it('saving again stores a swapped or removed image', async () => {
+        const deck = await savedDeck();
+        const card = makeCard(deck.id);
+        card.attachImage(imageFor(card));
+        await cards.save(card);
+
+        const swapped = imageFor(card);
+        card.attachImage(swapped);
+        await cards.save(card);
+        expect((await cards.findById(card.id))?.image?.key).toBe(swapped.key);
+
+        card.removeImage();
+        await cards.save(card);
+        expect((await cards.findById(card.id))?.image).toBeNull();
+      });
+
+      it('lists cards with their images', async () => {
+        const deck = await savedDeck();
+        const withImage = makeCard(deck.id, 'with image', at(-2));
+        const image = imageFor(withImage);
+        withImage.attachImage(image);
+        await cards.save(withImage);
+        await cards.save(makeCard(deck.id, 'without image', at(-1)));
+
+        const listed = await cards.findByDeck(deck.id);
+        const due = await cards.findDueByDeck(deck.id, T0, 10);
+
+        expect(listed.map((card) => card.image?.key ?? null)).toEqual([image.key, null]);
+        expect(due.map((card) => card.image?.key ?? null)).toEqual([image.key, null]);
       });
 
       it('returns nothing for malformed ids', async () => {

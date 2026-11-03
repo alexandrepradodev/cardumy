@@ -1,3 +1,4 @@
+import { CardImage } from '../../../domain/card-image.js';
 import { CardText } from '../../../domain/card-text.js';
 import { Card } from '../../../domain/card.js';
 import { DeckName } from '../../../domain/deck-name.js';
@@ -38,6 +39,7 @@ export function toCardRow(card: Card): CardRow {
     lastReviewedAt: schedule.lastReviewedAt,
     reviewCount: schedule.reviewCount,
     lapseCount: schedule.lapseCount,
+    imageKey: card.image?.key ?? null,
   };
 }
 
@@ -56,5 +58,6 @@ export function toCard(row: CardRow): Card {
       reviewCount: row.reviewCount,
       lapseCount: row.lapseCount,
     }),
+    image: row.imageKey === null ? null : CardImage.restore(row.imageKey),
   });
 }
