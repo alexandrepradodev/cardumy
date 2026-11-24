@@ -1,0 +1,21 @@
+# What never goes into the build context (the folder Docker receives).
+# Smaller context = faster builds, and no local secret leaks into an image.
+
+# Rebuilt inside the image, for Linux (the local ones are for macOS)
+node_modules
+dist
+
+# Secrets and local machine files
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# Not needed to build or run the API
+.git
+.github
+.claude
+docs
+tests
+coverage
+*.md
